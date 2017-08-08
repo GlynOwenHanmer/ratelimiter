@@ -49,6 +49,25 @@ func TestLimiter_decrement(t *testing.T) {
 	}
 }
 
+func TestLimiter_ZeroRate_Increment(t *testing.T) {
+	limiter := Limiter{rate:0.0,tokens:0,burst:100}
+	if limiter.hasTokens(){
+		t.Errorf("Expected hasTokens to return false but got true.")
+	}
+	if limiter.Allow() {
+		t.Errorf("Limiter which has tokens and a rate of 0 should not return true for Allow()")
+	}
+	for i := 0; i < 10; i++ {
+		limiter.increment()
+	}
+	if !limiter.hasTokens(){
+		t.Errorf("Expected hasTokens to return true but got false.")
+	}
+	if limiter.Allow() {
+		t.Errorf("Limiter which has tokens and a rate of 0 should not return true for Allow()")
+	}
+}
+
 func TestLimiter_incrementThenAllow(t *testing.T) {
 	limiter := Limiter{rate:1.0,tokens:0, burst:1}
 	limiter.increment()

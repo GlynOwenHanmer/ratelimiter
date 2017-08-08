@@ -17,7 +17,6 @@ func TestNewLimiter_NegativeRate(t *testing.T) {
 	}
 }
 
-//todo Add code to test for when Zero Rate Limiter bucket has been replenished/incremented
 func TestNewLimiter_ZeroRate(t *testing.T) {
 	zeroRate := 0.0
 	limiter, err := PocketMediaLimiter.NewLimiter(zeroRate, 1)
@@ -63,4 +62,3 @@ func TestLimiter_AllowAfterBurst(t *testing.T) {
 		t.Error("Limiter should not Allow after having all tokens drained in burst")
 	}
 }
-
