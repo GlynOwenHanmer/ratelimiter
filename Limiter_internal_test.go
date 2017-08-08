@@ -3,26 +3,52 @@ package PocketMediaLimiter
 import "testing"
 
 func TestLimiter_increment(t *testing.T) {
-	limiter := Limiter{tokens:false}
-	limiter.increment()
-	if !limiter.tokens {
-		t.Errorf("Expected limiter.tokens to be true after incremenet but got false")
+	burst := uint64(25)
+	limiter := Limiter{tokens:0, burst:burst}
+	for i := uint64(0); i < burst; i++ {
+		limiter.increment()
+	}
+	expectedTokens := uint64(burst)
+	actualTokens := limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
+	for i := 0; uint64(i) < burst; i++ {
+		limiter.increment()
+	}
+	expectedTokens = uint64(burst)
+	actualTokens = limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
 	}
 }
 
 func TestLimiter_decrement(t *testing.T) {
-	limiter := Limiter{tokens:true}
-	limiter.decrement()
-	if limiter.tokens {
-		t.Errorf("Expected limiter.tokens to be false after decremenet but got true")
+	burst := uint64(25)
+	limiter := Limiter{tokens:burst, burst:burst}
+	for i := uint64(0); i < burst; i++ {
+		limiter.decrement()
+	}
+	expectedTokens := uint64(0)
+	actualTokens := limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
+	for i := 0; uint64(i) < burst; i++ {
+		limiter.decrement()
+	}
+	expectedTokens = uint64(0)
+	actualTokens = limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
 	}
 }
 
 func TestLimiter_incrementThenAllow(t *testing.T) {
-	limiter := Limiter{rate:1.0,tokens:false}
+	limiter := Limiter{rate:1.0,tokens:0, burst:1}
 	limiter.increment()
-	if !limiter.tokens {
-		t.Errorf("Expected limiter.tokens to be true after incremenet but got false")
+	if !limiter.hasTokens() {
+		t.Errorf("Expected limiter.hasTokens to be true after incremenet but got false")
 	}
 	if !limiter.Allow() {
 		t.Errorf("Limiter should Allow() after having been incremented.")
@@ -32,17 +58,56 @@ func TestLimiter_incrementThenAllow(t *testing.T) {
 	}
 }
 
-func TestLimiter_incrementToLimit(t *testing.T) {
-	limiter := Limiter{rate:1.0, tokens:false}
+func TestLimiter_incrementToBurstLimit(t *testing.T) {
+	limiter := Limiter{rate:1.0, tokens:0, burst:1}
 	limiter.increment()
 	limiter.increment()
-	if !limiter.tokens {
+	expectedTokens := uint64(1)
+	actualTokens := limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
+	if !limiter.hasTokens() {
 		t.Errorf("Expected limiter.tokens to be true after incremenet but got false")
 	}
 	if !limiter.Allow() {
 		t.Errorf("Limiter should Allow() after having been incremented twice.")
 	}
+	expectedTokens = uint64(0)
+	actualTokens = limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
 	if limiter.Allow() {
 		t.Errorf("Limiter should not Allow() after having been incremented twice then Allowed.")
 	}
+}
+
+func TestLimiter_decrementFromZeroTokens(t *testing.T) {
+	limiter := Limiter{rate:1.0, tokens:0, burst:1}
+	limiter.decrement()
+	expectedTokens := uint64(0)
+	actualTokens := limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
+	if limiter.hasTokens() {
+		t.Error("Expected limiter.tokens to be false after decrement but got true")
+	}
+	if limiter.Allow() {
+		t.Error("Limiter.Allow() should not return true after having been decremented to 0 tokens.")
+	}
+	limiter.decrement()
+	expectedTokens = uint64(0)
+	actualTokens = limiter.tokens
+	if actualTokens != expectedTokens {
+		t.Errorf("Expected %d tokens but got %d", expectedTokens, actualTokens)
+	}
+	if limiter.hasTokens() {
+		t.Error("Expected limiter.tokens to be false after decrement but got true")
+	}
+	if limiter.Allow() {
+		t.Error("Limiter.Allow() should not return true after having been decremented to 0 tokens.")
+	}
+
 }
