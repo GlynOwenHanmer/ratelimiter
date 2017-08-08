@@ -2,7 +2,10 @@
 
 package PocketMediaLimiter
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestLimiter_increment(t *testing.T) {
 	burst := uint64(25)
@@ -111,5 +114,25 @@ func TestLimiter_decrementFromZeroTokens(t *testing.T) {
 	if limiter.Allow() {
 		t.Error("Limiter.Allow() should not return true after having been decremented to 0 tokens.")
 	}
+}
 
+func TestLimiter_timedIncrementing(t *testing.T) {
+	rate := 50.0
+	limiter, _ := NewLimiter(rate, 100)
+	limiter.tokens = 0
+	// Without this sleep, the timing isn't accurate enough to pass the tests.
+	time.Sleep(time.Millisecond * 10)
+	ticker := createTicker(frequency(rate))
+	ticks := uint64(0)
+	go func() {
+		for range ticker.C {
+			ticks++
+			actualTokens := limiter.tokens
+			if actualTokens != ticks {
+				t.Errorf("Expected %d tokens but has %d", ticks, actualTokens)
+			}
+		}
+	}()
+	timer := time.NewTimer(time.Second * 2)
+	<- timer.C
 }

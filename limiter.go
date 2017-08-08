@@ -2,6 +2,8 @@ package PocketMediaLimiter
 
 import (
 	"errors"
+	"time"
+	"math"
 )
 
 // Limiter is a token-bucket implemented rate limiter.
@@ -20,11 +22,35 @@ func (limiter Limiter) Rate() float64 {
 
 // NewLimiter returns a Limiter with the given rate and an error if there is a problem with the rate provided.
 // NewLimiter will return a Limiter with a rate of 0 and an error if a negative rate is given.
-func NewLimiter(rateLimit float64, burst uint64) (Limiter, error) {
-	if rateLimit < 0 {
-		return Limiter{}, errors.New("Limiter rate cannot be negative.")
+func NewLimiter(rate float64, burst uint64) (*Limiter, error) {
+	if rate < 0 {
+		return &Limiter{}, errors.New("Limiter rate cannot be negative.")
 	}
-	return Limiter{rate:frequency(rateLimit), tokens:burst, burst:burst}, nil
+	frequency := frequency(rate)
+	limiter := Limiter{rate:frequency, tokens:burst, burst:burst}
+	createIncrementer(frequency, &limiter)
+	return &limiter, nil
+}
+
+// createIncrementer starts a goroutine that will increment the Limiter token bucket at a rate equal to the rate of the Limiter
+func createIncrementer(frequency frequency, limiter *Limiter) {
+	ticker := createTicker(frequency)
+	go func() {
+		for range ticker.C {
+			limiter.increment()
+		}
+	}()
+}
+
+// createTicker returns a ticker that will tick at a given frequency
+func createTicker(frequency frequency) *time.Ticker {
+	var duration time.Duration
+	if frequency <= 0.0 {
+		duration = time.Duration(math.MaxInt64)
+	} else {
+		duration = time.Duration(frequency.period() * float64(time.Second.Nanoseconds()))
+	}
+	return time.NewTicker(duration)
 }
 
 // Allow returns true if the event can be invoked within the allowed rate of the Limiter.
