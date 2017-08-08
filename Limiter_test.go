@@ -32,3 +32,19 @@ func TestNewLimiter_ZeroRate(t *testing.T) {
 		t.Errorf("Zero rate Limiter.Allow() should return false but returned true.")
 	}
 }
+
+func TestNewLimiter_PositiveRate(t *testing.T) {
+	rate := 1.0
+	limiter, err := PocketMediaLimiter.NewLimiter(rate)
+	if err != nil {
+		t.Errorf("Expected nil error but received %s", err.Error())
+	}
+	actualRate := limiter.Rate()
+	if actualRate != rate {
+		t.Errorf("Expected rate of %f but got  %f", rate, actualRate)
+	}
+	if !limiter.Allow() {
+		t.Errorf("Positive rate Limiter.Allow() should return true immeditaely after creating but returned true.")
+	}
+}
+
