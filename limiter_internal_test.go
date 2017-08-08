@@ -1,3 +1,5 @@
+// internal tests to help with development of Limiter type whilst being able to access unexported fields and methods
+
 package PocketMediaLimiter
 
 import "testing"
