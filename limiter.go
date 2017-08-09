@@ -33,7 +33,7 @@ func NewLimiter(rate float64, burst uint64) (*Limiter, error) {
 	if frequency <= 0.0 {
 		ti = TickingIncrementer{}
 	} else {
-		ti, err = NewTickingIncrementer(&bucket, frequency.period())
+		ti, err = NewTickingIncrementer(&limiter.tokenBucket, frequency.period())
 		if err != nil {
 			return &Limiter{}, err
 		}

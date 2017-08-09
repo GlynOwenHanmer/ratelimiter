@@ -39,7 +39,10 @@ func TestLimiter_Allow(t *testing.T) {
 
 func TestLimiter_IsIncrementedOverTime(t *testing.T) {
 	rate := 100.0
-	limiter, _ := NewLimiter(rate, uint64(rate))
+	limiter, err := NewLimiter(rate, uint64(rate))
+	if err != nil {
+		t.Fatalf("Error when creating Limiter for testing. Error: %s", err.Error())
+	}
 	if limiter.tokens != 1 {
 		t.Errorf("Limiter should start with 1 token.")
 	}
