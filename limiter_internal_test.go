@@ -152,6 +152,6 @@ func TestLimiter_timedIncrementing(t *testing.T) {
 			}
 		}
 	}()
-	timer := time.NewTimer(time.Second * 2)
-	<- timer.C
+	time.Sleep(time.Second * 2)
+	ticker.Stop()
 }
