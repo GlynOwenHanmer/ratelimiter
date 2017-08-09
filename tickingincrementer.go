@@ -21,7 +21,7 @@ func NewTickingIncrementer(incrementer Incrementer, duration time.Duration) (Tic
 	if incrementer == nil {
 		return TickingIncrementer{}, errors.New("No Incrementer provided.")
 	}
-	if duration < 1 {
+	if duration < time.Nanosecond {
 		return TickingIncrementer{}, errors.New("Duration must be positive.")
 	}
 	ticker := time.NewTicker(duration)

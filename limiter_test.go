@@ -21,7 +21,7 @@ func TestNewLimiter_ZeroRate(t *testing.T) {
 	zeroRate := 0.0
 	limiter, err := PocketMediaLimiter.NewLimiter(zeroRate, 1)
 	if err != nil {
-		t.Errorf("Expected nil error but received %s", err.Error())
+		t.Errorf("Expected nil error but received: %s", err.Error())
 	}
 	actualRate := limiter.Rate()
 	if actualRate != zeroRate {

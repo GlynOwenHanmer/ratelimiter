@@ -2,8 +2,6 @@ package PocketMediaLimiter
 
 import (
 	"errors"
-	"time"
-	"math"
 )
 
 // Limiter is a token-bucket implemented rate limiter.
@@ -12,6 +10,7 @@ import (
 type Limiter struct {
 	rate frequency
 	tokenBucket
+	tickingIncrementer TickingIncrementer
 }
 
 // Rate returns the average rate, measured as events per second, at which the limiter is to allow an event to be triggered.
@@ -28,29 +27,19 @@ func NewLimiter(rate float64, burst uint64) (*Limiter, error) {
 	frequency := frequency(rate)
 	bucket := tokenBucket{tokens:1, depth:burst}
 	limiter := Limiter{rate:frequency, tokenBucket:bucket}
-	createIncrementer(frequency, &limiter)
-	return &limiter, nil
-}
 
-// createIncrementer starts a goroutine that will increment the Limiter token bucket at a rate equal to the rate of the Limiter
-func createIncrementer(frequency frequency, limiter *Limiter) {
-	ticker := createTicker(frequency)
-	go func() {
-		for range ticker.C {
-			limiter.Increment()
-		}
-	}()
-}
-
-// createTicker returns a ticker that will tick at a given frequency
-func createTicker(frequency frequency) *time.Ticker {
-	var duration time.Duration
+	var ti TickingIncrementer
+	var err error
 	if frequency <= 0.0 {
-		duration = time.Duration(math.MaxInt64)
+		ti = TickingIncrementer{}
 	} else {
-		duration = time.Duration(frequency.period() * float64(time.Second.Nanoseconds()))
+		ti, err = NewTickingIncrementer(&bucket, frequency.period())
+		if err != nil {
+			return &Limiter{}, err
+		}
 	}
-	return time.NewTicker(duration)
+	limiter.tickingIncrementer = ti
+	return &limiter, nil
 }
 
 // Allow returns true if the event can be invoked within the allowed rate of the Limiter.

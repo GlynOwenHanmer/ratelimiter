@@ -4,6 +4,7 @@ package PocketMediaLimiter
 
 import (
 	"testing"
+	"time"
 )
 
 func TestLimiter_ZeroRate_Allow(t *testing.T) {
@@ -36,23 +37,14 @@ func TestLimiter_Allow(t *testing.T) {
 	}
 }
 
-//func TestLimiter_timedIncrementing(t *testing.T) {
-//	rate := 50.0
-//	limiter, _ := NewLimiter(rate, 100)
-//	limiter.tokens = 0
-//	 Without this sleep, the timing isn't accurate enough to pass the tests.
-	//time.Sleep(time.Millisecond * 10)
-	//ticker := createTicker(frequency(rate))
-	//ticks := uint64(0)
-	//go func() {
-	//	for range ticker.C {
-	//		ticks++
-	//		actualTokens := limiter.tokens
-	//		if actualTokens != ticks {
-	//			t.Errorf("Expected %d tokens but has %d", ticks, actualTokens)
-	//		}
-	//	}
-	//}()
-	//time.Sleep(time.Second * 2)
-	//ticker.Stop()
-//}
+func TestLimiter_IsIncrementedOverTime(t *testing.T) {
+	rate := 100.0
+	limiter, _ := NewLimiter(rate, uint64(rate))
+	if limiter.tokens != 1 {
+		t.Errorf("Limiter should start with 1 token.")
+	}
+	time.Sleep(time.Second)
+	if limiter.tokens != limiter.tokenBucket.depth {
+		t.Errorf("Expected Limiter tokenBucket to be full after 1 second. Expected %d tokens but got %d", limiter.tokenBucket.depth, limiter.tokens)
+	}
+}
