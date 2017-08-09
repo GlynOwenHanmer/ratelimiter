@@ -38,7 +38,7 @@ func TestLimiter_Allow(t *testing.T) {
 }
 
 func TestLimiter_IsIncrementedOverTime(t *testing.T) {
-	rate := 100.0
+	rate := Frequency(100.0)
 	limiter, err := NewLimiter(rate, uint64(rate))
 	if err != nil {
 		t.Fatalf("Error when creating Limiter for testing. Error: %s", err.Error())

@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewLimiter_NegativeRate(t *testing.T) {
-	negativeRate := -10.0
+	negativeRate := PocketMediaLimiter.Frequency(-10.0)
 	limiter, err := PocketMediaLimiter.NewLimiter(negativeRate, 1)
 	if err == nil {
 		t.Error("Expected non-nil error but receieve nil.")
@@ -20,7 +20,7 @@ func TestNewLimiter_NegativeRate(t *testing.T) {
 }
 
 func TestNewLimiter_ZeroRate(t *testing.T) {
-	zeroRate := 0.0
+	zeroRate := PocketMediaLimiter.Frequency(0.0)
 	limiter, err := PocketMediaLimiter.NewLimiter(zeroRate, 1)
 	if err != nil {
 		t.Errorf("Expected nil error but received: %s", err.Error())
@@ -35,7 +35,7 @@ func TestNewLimiter_ZeroRate(t *testing.T) {
 }
 
 func TestNewLimiter_PositiveRate(t *testing.T) {
-	rate := 1.0
+	rate := PocketMediaLimiter.Frequency(1.0)
 	limiter, err := PocketMediaLimiter.NewLimiter(rate, 1)
 	if err != nil {
 		t.Errorf("Expected nil error but received %s", err.Error())
@@ -56,7 +56,7 @@ func TestLimiter_Accuracy(t *testing.T) {
 	}
 	// 2 ^ 15 = 32768, Highest rate will be 32768Hz
 	for pow := 0; pow < 15; pow++ {
-		rate := math.Pow(2,float64(pow))
+		rate := PocketMediaLimiter.Frequency(math.Pow(2,float64(pow)))
 		limiter, err := PocketMediaLimiter.NewLimiter(rate, 1)
 		if err != nil {
 			t.Fatalf("Unexpected error creating limiter for testing: %s", err.Error())
