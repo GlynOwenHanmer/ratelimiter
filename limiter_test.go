@@ -80,3 +80,23 @@ func TestLimiter_Accuracy(t *testing.T) {
 		t.Logf("Rate: %f, Allows: %d, Expected Allows: %d, Accuracy: %f%%", rate, allowCount, expectedAllowCount, accuracy)
 	}
 }
+
+// Test that a burst can be achieved once the token bucket has been given time to fill.
+func TestLimiter_Burst(t *testing.T) {
+	rate := PocketMediaLimiter.Frequency(20)
+	burst := uint64(10)
+	limiter, err := PocketMediaLimiter.NewLimiter(rate, burst)
+	if err != nil {
+		t.Fatalf("Unexpected error creating limiter for testing: %s", err.Error())
+	}
+	// Allow limiter token bucket to fill
+	time.Sleep(time.Millisecond * 500)
+	for i := uint64(0); i < burst; i++ {
+		if !limiter.Allow() {
+			t.Errorf("Expected limiter to return true for Allow() but returned false.")
+		}
+	}
+	if limiter.Allow() {
+		t.Errorf("Expected limiter to return false after having Allow() called the maximum burst number of times")
+	}
+}
