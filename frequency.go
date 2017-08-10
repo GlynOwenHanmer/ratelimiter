@@ -1,4 +1,4 @@
-package PocketMediaLimiter
+package ratelimiter
 
 import (
 	"time"

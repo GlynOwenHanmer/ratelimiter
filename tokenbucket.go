@@ -1,4 +1,4 @@
-package PocketMediaLimiter
+package ratelimiter
 
 // tokenBucket holds a number representing a count of tokens within a bucket with a given depth.
 // A tokenBucket can have tokens added to it and taken away from it but will never overflow the depth of the bucket or have a negative value for the number of tokens it holds.

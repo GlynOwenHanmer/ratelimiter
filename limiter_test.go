@@ -1,16 +1,16 @@
-package PocketMediaLimiter_test
+package ratelimiter_test
 
 import (
 	"testing"
-	"github.com/GlynOwenHanmer/PocketMediaLimiter"
+	"github.com/GlynOwenHanmer/ratelimiter"
 	"math"
 	"time"
 	"fmt"
 )
 
 func TestNewLimiter_NegativeRate(t *testing.T) {
-	negativeRate := PocketMediaLimiter.Frequency(-10.0)
-	limiter, err := PocketMediaLimiter.NewLimiter(negativeRate, 1)
+	negativeRate := ratelimiter.Frequency(-10.0)
+	limiter, err := ratelimiter.NewLimiter(negativeRate, 1)
 	if err == nil {
 		t.Error("Expected non-nil error but receieve nil.")
 	}
@@ -21,8 +21,8 @@ func TestNewLimiter_NegativeRate(t *testing.T) {
 }
 
 func TestNewLimiter_ZeroRate(t *testing.T) {
-	zeroRate := PocketMediaLimiter.Frequency(0.0)
-	limiter, err := PocketMediaLimiter.NewLimiter(zeroRate, 1)
+	zeroRate := ratelimiter.Frequency(0.0)
+	limiter, err := ratelimiter.NewLimiter(zeroRate, 1)
 	if err != nil {
 		t.Errorf("Expected nil error but received: %s", err.Error())
 	}
@@ -36,8 +36,8 @@ func TestNewLimiter_ZeroRate(t *testing.T) {
 }
 
 func TestNewLimiter_PositiveRate(t *testing.T) {
-	rate := PocketMediaLimiter.Frequency(1.0)
-	limiter, err := PocketMediaLimiter.NewLimiter(rate, 1)
+	rate := ratelimiter.Frequency(1.0)
+	limiter, err := ratelimiter.NewLimiter(rate, 1)
 	if err != nil {
 		t.Errorf("Expected nil error but received %s", err.Error())
 	}
@@ -57,8 +57,8 @@ func TestLimiter_Accuracy(t *testing.T) {
 	}
 	// 2 ^ 15 = 32768, Highest rate will be 32768Hz
 	for pow := 0; pow < 15; pow++ {
-		rate := PocketMediaLimiter.Frequency(math.Pow(2,float64(pow)))
-		limiter, err := PocketMediaLimiter.NewLimiter(rate, 1)
+		rate := ratelimiter.Frequency(math.Pow(2,float64(pow)))
+		limiter, err := ratelimiter.NewLimiter(rate, 1)
 		if err != nil {
 			t.Fatalf("Unexpected error creating limiter for testing: %s", err.Error())
 		}
@@ -84,9 +84,9 @@ func TestLimiter_Accuracy(t *testing.T) {
 
 // Test that a burst can be achieved once the token bucket has been given time to fill.
 func TestLimiter_Burst(t *testing.T) {
-	rate := PocketMediaLimiter.Frequency(20)
+	rate := ratelimiter.Frequency(20)
 	burst := uint64(10)
-	limiter, err := PocketMediaLimiter.NewLimiter(rate, burst)
+	limiter, err := ratelimiter.NewLimiter(rate, burst)
 	if err != nil {
 		t.Fatalf("Unexpected error creating limiter for testing: %s", err.Error())
 	}
@@ -103,9 +103,9 @@ func TestLimiter_Burst(t *testing.T) {
 }
 
 func ExampleNewLimiter() {
-	rate := PocketMediaLimiter.Frequency(10)
+	rate := ratelimiter.Frequency(10)
 	burst := uint64(3)
-	limiter, err := PocketMediaLimiter.NewLimiter(rate, burst)
+	limiter, err := ratelimiter.NewLimiter(rate, burst)
 	if err != nil {
 		fmt.Printf("Unable to create Limiter: %s", err.Error())
 		return

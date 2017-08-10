@@ -1,18 +1,18 @@
-package PocketMediaLimiter_test
+package ratelimiter_test
 
 import (
 	"testing"
 	"time"
-	"github.com/GlynOwenHanmer/PocketMediaLimiter"
 	"fmt"
 	"math"
+	"github.com/GlynOwenHanmer/ratelimiter"
 )
 
 func TestNewFrequency(t *testing.T) {
 	testSets := []struct{
 		occurences uint64
 		time.Duration
-		PocketMediaLimiter.Frequency
+		ratelimiter.Frequency
 		expectError bool
 	}{
 		{
@@ -24,30 +24,30 @@ func TestNewFrequency(t *testing.T) {
 		{
 			occurences:0,
 			Duration:0,
-			Frequency:PocketMediaLimiter.Frequency(math.MaxFloat64),
+			Frequency:ratelimiter.Frequency(math.MaxFloat64),
 			expectError:true,
 		},
 		{
 			occurences:0,
 			Duration:-1,
-			Frequency:PocketMediaLimiter.Frequency(math.MaxFloat64),
+			Frequency:ratelimiter.Frequency(math.MaxFloat64),
 			expectError:true,
 		},
 		{
 			occurences:10,
 			Duration:time.Second,
 			expectError:false,
-			Frequency:PocketMediaLimiter.Frequency(10),
+			Frequency:ratelimiter.Frequency(10),
 		},
 		{
 			occurences:10,
 			Duration:time.Millisecond,
 			expectError:false,
-			Frequency:PocketMediaLimiter.Frequency(10000),
+			Frequency:ratelimiter.Frequency(10000),
 		},
 	}
 	for _, testSet := range testSets {
-		freq, err := PocketMediaLimiter.NewFrequency(testSet.occurences, testSet.Duration)
+		freq, err := ratelimiter.NewFrequency(testSet.occurences, testSet.Duration)
 		switch {
 		case err == nil && testSet.expectError:
 			t.Errorf("Expected error but received none.")
@@ -62,7 +62,7 @@ func TestNewFrequency(t *testing.T) {
 }
 
 func ExampleNewFrequency() {
-	rate, err := PocketMediaLimiter.NewFrequency(250, time.Second * 2)
+	rate, err := ratelimiter.NewFrequency(250, time.Second * 2)
 	if err != nil {
 		fmt.Printf("Unable to create Frequency: %s", err.Error())
 		return
