@@ -60,3 +60,13 @@ func TestNewFrequency(t *testing.T) {
 		}
 	}
 }
+
+func ExampleNewFrequency() {
+	rate, err := PocketMediaLimiter.NewFrequency(250, time.Second * 2)
+	if err != nil {
+		fmt.Printf("Unable to create Frequency: %s", err.Error())
+		return
+	}
+	fmt.Printf("%.2f", rate)
+	// Output: 125.00
+}

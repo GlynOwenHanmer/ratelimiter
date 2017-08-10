@@ -5,6 +5,7 @@ import (
 	"github.com/GlynOwenHanmer/PocketMediaLimiter"
 	"math"
 	"time"
+	"fmt"
 )
 
 func TestNewLimiter_NegativeRate(t *testing.T) {
@@ -99,4 +100,46 @@ func TestLimiter_Burst(t *testing.T) {
 	if limiter.Allow() {
 		t.Errorf("Expected limiter to return false after having Allow() called the maximum burst number of times")
 	}
+}
+
+func ExampleNewLimiter() {
+	rate := PocketMediaLimiter.Frequency(10)
+	burst := uint64(3)
+	limiter, err := PocketMediaLimiter.NewLimiter(rate, burst)
+	if err != nil {
+		fmt.Printf("Unable to create Limiter: %s", err.Error())
+		return
+	}
+	printAllowed := func (allowed bool) {
+		if allowed {
+			// Your rate-limited event should be triggered here.
+			fmt.Println("Allowed.")
+			return
+		}
+		// Do not run your rate-limited event here.
+		fmt.Println("Not allowed.")
+	}
+	// This sleep seems to be needed to hear to pass tests. Perhaps to give time for the Limiter Ticker to get started.
+	time.Sleep(time.Millisecond * 10)
+	printAllowed(limiter.Allow())
+	time.Sleep(time.Millisecond * 100)
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	time.Sleep(time.Millisecond * 400)
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	printAllowed(limiter.Allow())
+	// Output:
+	// Allowed.
+	// Allowed.
+	// Not allowed.
+	// Not allowed.
+	// Allowed.
+	// Allowed.
+	// Allowed.
+	// Not allowed.
+	// Not allowed.
 }
